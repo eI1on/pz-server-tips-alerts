@@ -1,0 +1,6 @@
+name=[B41] Server Tips & Alerts [DEV Branch]
+poster=poster.png
+id=ServerTipsAlerts_DEV
+description=This mod displays helpful tips, server rules, and bug notifications to players through an elegant popup system that adapts to gameplay conditions.
+tags=Build 41,Misc,Multiplayer,Interface
+versionMin=41.0

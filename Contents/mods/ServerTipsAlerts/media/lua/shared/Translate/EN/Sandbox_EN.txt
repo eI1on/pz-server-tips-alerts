@@ -1,0 +1,30 @@
+Sandbox_EN = {
+  Sandbox_VehicleRespawnManager = "Vehicle Respawn Manager",
+
+  Sandbox_VehicleRespawnManager_enableLogging = "Enable Logging",
+  Sandbox_VehicleRespawnManager_enableLogging_tooltip = "Turn <SPACE> <PUSHRGB:1,0.8,0> ON <POPRGB> <SPACE> to activate debug logging for troubleshooting. <BR> Captures spawn successes/failures, zone selections, and system operations in server logs. <BR> <ORANGE><SPACE> Recommended for diagnosing missing vehicles or spawn conflicts. <RGB:1,1,1>",
+
+  Sandbox_TipsPopup = "Server Tips & Alerts",
+
+  Sandbox_TipsPopup_Enabled = "Enable Tips Popup",
+  Sandbox_TipsPopup_Enabled_tooltip = "Turn on/off the tips popup system",
+
+  Sandbox_TipsPopup_DisplayTime = "Display Duration",
+  Sandbox_TipsPopup_DisplayTime_tooltip = "How long each popup stays visible in <ORANGE><SPACE> seconds <RGB:1,1,1>",
+
+  Sandbox_TipsPopup_FadeInTime = "Fade In Duration",
+  Sandbox_TipsPopup_FadeInTime_tooltip = "How long it takes for the popup to fade in, in <ORANGE><SPACE> seconds <RGB:1,1,1>",
+
+  Sandbox_TipsPopup_FadeOutTime = "Fade Out Duration",
+  Sandbox_TipsPopup_FadeOutTime_tooltip = "How long it takes for the popup to fade out, in <ORANGE><SPACE> seconds <RGB:1,1,1>",
+
+  Sandbox_TipsPopup_MinDisplayInterval = "Minimum Display Interval",
+  Sandbox_TipsPopup_MinDisplayInterval_tooltip = "Minimum time between popups in <ORANGE><SPACE> seconds <RGB:1,1,1>",
+
+  Sandbox_TipsPopup_MaxDisplayInterval = "Maximum Display Interval",
+  Sandbox_TipsPopup_MaxDisplayInterval_tooltip = "Maximum time between popups in <ORANGE><SPACE> seconds <RGB:1,1,1>",
+
+  Sandbox_TipsPopup_ZombieSafetyRadius = "Zombie Safety Radius",
+  Sandbox_TipsPopup_ZombieSafetyRadius_tooltip = "Won't show popups if zombies are within this many tiles <ORANGE><SPACE> (0 = always show) <RGB:1,1,1>",
+
+}

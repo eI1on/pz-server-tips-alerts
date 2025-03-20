@@ -1,0 +1,69 @@
+VERSION = 1,
+
+option TipsPopup.Enabled
+{
+    type = boolean,
+    default = true,
+    page = TipsPopup,
+    translation = TipsPopup_Enabled,
+}
+
+option TipsPopup.DisplayTime
+{
+    type = integer,
+    min = 1,
+    max = 30,
+    default = 3,
+    page = TipsPopup,
+    translation = TipsPopup_DisplayTime,
+}
+
+option TipsPopup.FadeInTime
+{
+    type = integer,
+    min = 0,
+    max = 5,
+    default = 1,
+    page = TipsPopup,
+    translation = TipsPopup_FadeInTime,
+}
+
+option TipsPopup.FadeOutTime
+{
+    type = integer,
+    min = 0,
+    max = 5,
+    default = 1,
+    page = TipsPopup,
+    translation = TipsPopup_FadeOutTime,
+}
+
+option TipsPopup.MinDisplayInterval
+{
+    type = integer,
+    min = 1,
+    max = 300,
+    default = 10,
+    page = TipsPopup,
+    translation = TipsPopup_MinDisplayInterval,
+}
+
+option TipsPopup.MaxDisplayInterval
+{
+    type = integer,
+    min = 2,
+    max = 600,
+    default = 30,
+    page = TipsPopup,
+    translation = TipsPopup_MaxDisplayInterval,
+}
+
+option TipsPopup.ZombieSafetyRadius
+{
+    type = integer,
+    min = 0,
+    max = 50,
+    default = 15,
+    page = TipsPopup,
+    translation = TipsPopup_ZombieSafetyRadius,
+}

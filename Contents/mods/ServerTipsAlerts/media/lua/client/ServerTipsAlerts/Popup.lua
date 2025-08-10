@@ -1,4 +1,7 @@
+local Shared = require("ServerTipsAlerts/Shared")
 local TipsClient = require("ServerTipsAlerts/Client")
+
+local UdderlyIntegration = require("ServerTipsAlerts/UdderlyIntegration")
 
 local POPUP_CONFIG = {
     BACKGROUND_ALPHA = 0.5,
@@ -17,6 +20,9 @@ local POPUP_CONFIG = {
 
     ZOMBIE_SAFETY_RADIUS = 15,
     ZOMBIE_CHECK_INTERVAL = 60,
+
+    RESTART_MESSAGE_PRIORITY = true,
+    RESTART_MESSAGE_DISPLAY_TIME = 10000,
 
     ENABLED = true
 }
@@ -61,6 +67,7 @@ function TipsPopup:initialise()
     ISPanel.initialise(self)
 
     self.messages = {}
+    self.priorityQueue = {}
 
     TipsClient.addCallback(function(messages)
         self:updateFromClient(messages)
@@ -73,6 +80,8 @@ function TipsPopup:initialise()
     self.lastSafetyCheck = true
     self.isInVehicle = false
     self.playerNum = 0
+    self.currentMessage = nil
+    self.isPriorityMessage = false
 
     self.textPanel = ISRichTextPanel:new(0, 0, self.width, self.height)
     self.textPanel:initialise()
@@ -91,7 +100,9 @@ function TipsPopup:initialise()
 end
 
 function TipsPopup:updateFromClient(messages)
-    self.messages = messages
+    if messages and #messages > 0 then
+        self.messages = messages
+    end
 end
 
 function TipsPopup:scheduleNextPopup()
@@ -154,12 +165,24 @@ function TipsPopup:calculateTextWidth(message)
     return math.min(textWidth, maxWidth)
 end
 
-function TipsPopup:showPopup()
-    if self.messages and #self.messages == 0 then return end
+function TipsPopup:forceShowMessage(message)
+    if self.currentState ~= "hidden" then
+        if self.isPriorityMessage then
+            table.insert(self.priorityQueue, message)
+            return
+        end
 
-    local messageIndex = ZombRand(1, #self.messages + 1)
-    local message = self.messages[messageIndex]
+        self.currentState = "hidden"
+    end
 
+    self.currentMessage = message
+    self.isPriorityMessage = true
+    self:showMessage(message)
+
+    self.stateStartTime = getTimestampMs()
+end
+
+function TipsPopup:showMessage(message)
     local textWidth = self:calculateTextWidth(message)
     self:setWidth(textWidth)
     self.textPanel:setWidth(textWidth)
@@ -178,6 +201,34 @@ function TipsPopup:showPopup()
     self.textPanel:setContentTransparency(self.currentAlpha)
 
     self:updatePosition()
+end
+
+function TipsPopup:showPopup()
+    if #self.messages == 0 then
+        return
+    end
+
+    if #self.priorityQueue > 0 then
+        local message = table.remove(self.priorityQueue, 1)
+        self.currentMessage = message
+        self.isPriorityMessage = true
+        self:showMessage(message)
+        return
+    end
+
+    if UdderlyIntegration and UdderlyIntegration.activeRestartPopups and #UdderlyIntegration.activeRestartPopups > 0 then
+        local message = UdderlyIntegration.activeRestartPopups[1]
+        self.currentMessage = message
+        self.isPriorityMessage = true
+        self:showMessage(message)
+        return
+    end
+
+    local messageIndex = ZombRand(1, #self.messages + 1)
+    local message = self.messages[messageIndex]
+    self.currentMessage = message
+    self.isPriorityMessage = false
+    self:showMessage(message)
 end
 
 function TipsPopup:update()
@@ -199,6 +250,8 @@ function TipsPopup:update()
     end
 
     local timeInState = currentTime - self.stateStartTime
+    local displayTime = self.isPriorityMessage and POPUP_CONFIG.RESTART_MESSAGE_DISPLAY_TIME or POPUP_CONFIG
+    .DISPLAY_TIME
 
     if self.currentState == "fadingIn" then
         self.currentAlpha = math.min(1, timeInState / POPUP_CONFIG.FADE_IN_TIME)
@@ -208,7 +261,7 @@ function TipsPopup:update()
             self.stateStartTime = currentTime
         end
     elseif self.currentState == "visible" then
-        if timeInState >= POPUP_CONFIG.DISPLAY_TIME then
+        if timeInState >= displayTime then
             self.currentState = "fadingOut"
             self.stateStartTime = currentTime
         end
@@ -218,6 +271,16 @@ function TipsPopup:update()
         if timeInState >= POPUP_CONFIG.FADE_OUT_TIME then
             self.currentState = "hidden"
             self.stateStartTime = currentTime
+
+            if self.isPriorityMessage and UdderlyIntegration and UdderlyIntegration.activeRestartPopups and #UdderlyIntegration.activeRestartPopups > 0 then
+                if self.currentMessage == UdderlyIntegration.activeRestartPopups[1] then
+                    table.remove(UdderlyIntegration.activeRestartPopups, 1)
+                end
+            end
+
+            self.isPriorityMessage = false
+            self.currentMessage = nil
+
             self:scheduleNextPopup()
         end
     end
@@ -257,7 +320,7 @@ function TipsPopup:updatePosition()
         if hotbar then
             yPosition = hotbar:getY() - self:getHeight() - POPUP_CONFIG.HOTBAR_PADDING
         else
-            yPosition = getCore():getScreenHeight() - 100 - self:getHeight()
+            yPosition = getCore():getScreenHeight() - 200 - self:getHeight()
         end
     end
 
@@ -288,26 +351,28 @@ function TipsPopup:new(playerNum)
     return o
 end
 
-local tipsPopups = {}
+local tipsAndAlertsPopups = {}
+
+_G.tipsAndAlertsPopups = tipsAndAlertsPopups
 
 local function onEnterVehicle(player)
     local playerNum = player:getPlayerNum()
-    if tipsPopups[playerNum] then
-        tipsPopups[playerNum]:checkVehicleStatus()
+    if tipsAndAlertsPopups[playerNum] then
+        tipsAndAlertsPopups[playerNum]:checkVehicleStatus()
     end
 end
 
 local function onExitVehicle(player)
     local playerNum = player:getPlayerNum()
-    if tipsPopups[playerNum] then
-        tipsPopups[playerNum]:checkVehicleStatus()
+    if tipsAndAlertsPopups[playerNum] then
+        tipsAndAlertsPopups[playerNum]:checkVehicleStatus()
     end
 end
 
 local function onSwitchVehicleSeat(player)
     local playerNum = player:getPlayerNum()
-    if tipsPopups[playerNum] then
-        tipsPopups[playerNum]:checkVehicleStatus()
+    if tipsAndAlertsPopups[playerNum] then
+        tipsAndAlertsPopups[playerNum]:checkVehicleStatus()
     end
 end
 
@@ -319,11 +384,15 @@ local function createTipsPopup()
     end
 
     for i = 0, getNumActivePlayers() - 1 do
-        if not tipsPopups[i] then
-            tipsPopups[i] = TipsPopup:new(i)
-            tipsPopups[i]:initialise()
-            tipsPopups[i]:addToUIManager()
+        if not tipsAndAlertsPopups[i] then
+            tipsAndAlertsPopups[i] = TipsPopup:new(i)
+            tipsAndAlertsPopups[i]:initialise()
+            tipsAndAlertsPopups[i]:addToUIManager()
         end
+    end
+
+    if UdderlyIntegration and UdderlyIntegration.init then
+        UdderlyIntegration.init()
     end
 end
 

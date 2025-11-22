@@ -8,6 +8,14 @@ option TipsPopup.Enabled
     translation = TipsPopup_Enabled,
 }
 
+option TipsPopup.PlayerCanToggle
+{
+    type = boolean,
+    default = false,
+    page = TipsPopup,
+    translation = TipsPopup_PlayerCanToggle,
+}
+
 option TipsPopup.DisplayTime
 {
     type = integer,

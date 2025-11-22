@@ -24,8 +24,20 @@ local POPUP_CONFIG = {
     RESTART_MESSAGE_PRIORITY = true,
     RESTART_MESSAGE_DISPLAY_TIME = 10000,
 
-    ENABLED = true
+    ENABLED = true,
+    CLIENT_TOGGLE = true,
 }
+
+local function isPopupSystemActive()
+    if not POPUP_CONFIG.ENABLED then
+        return false
+    end
+    if SandboxVars.TipsPopup.PlayerCanToggle then
+        return POPUP_CONFIG.CLIENT_TOGGLE
+    end
+    return true
+end
+
 
 local function loadSandboxOptions()
     local sandboxOptions = SandboxVars.TipsPopup
@@ -234,6 +246,12 @@ end
 function TipsPopup:update()
     ISPanel.update(self)
 
+    if not isPopupSystemActive() then
+        self.currentState = "hidden"
+        self.currentMessage = nil
+        return
+    end
+
     self:checkVehicleStatus()
     self:updatePosition()
 
@@ -251,7 +269,7 @@ function TipsPopup:update()
 
     local timeInState = currentTime - self.stateStartTime
     local displayTime = self.isPriorityMessage and POPUP_CONFIG.RESTART_MESSAGE_DISPLAY_TIME or POPUP_CONFIG
-    .DISPLAY_TIME
+        .DISPLAY_TIME
 
     if self.currentState == "fadingIn" then
         self.currentAlpha = math.min(1, timeInState / POPUP_CONFIG.FADE_IN_TIME)
@@ -379,7 +397,7 @@ end
 local function createTipsPopup()
     loadSandboxOptions()
 
-    if not POPUP_CONFIG.ENABLED then
+    if not isPopupSystemActive() then
         return
     end
 
@@ -403,5 +421,36 @@ Events.OnInitGlobalModData.Add(loadSandboxOptions)
 Events.OnEnterVehicle.Add(onEnterVehicle)
 Events.OnExitVehicle.Add(onExitVehicle)
 Events.OnSwitchVehicleSeat.Add(onSwitchVehicleSeat)
+
+if ModOptions and ModOptions.getInstance then
+    local function ServerTipsAlertsOnModOptionsApply(optionValues)
+        POPUP_CONFIG.CLIENT_TOGGLE = optionValues.settings.options.client_toggle;
+    end
+
+    local function ServerTipsAlertsOnModOptionsApplyInGame(optionValues)
+        ServerTipsAlertsOnModOptionsApply(optionValues);
+    end
+
+    local SETTINGS = {
+        options_data = {
+            client_toggle = {
+                name = "IGUI_TipsPopup_ClientToggle",
+                tooltip = "IGUI_TipsPopup_ClientToggle_ToolTip",
+                default = true,
+                OnApplyMainMenu = ServerTipsAlertsOnModOptionsApply,
+                OnApplyInGame = ServerTipsAlertsOnModOptionsApplyInGame,
+            },
+        },
+
+        mod_id = 'ServerTipsAlerts',
+        mod_shortname = 'Server Tips & Alerts',
+        mod_fullname = 'Server Tips & Alerts',
+    };
+
+    ModOptions:getInstance(SETTINGS);
+    ModOptions:loadFile();
+
+    Events.OnGameBoot.Add(function() ServerTipsAlertsOnModOptionsApplyInGame({ settings = SETTINGS }) end);
+end
 
 return TipsPopup

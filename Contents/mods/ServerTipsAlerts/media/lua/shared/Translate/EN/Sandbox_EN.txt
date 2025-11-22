@@ -1,13 +1,11 @@
 Sandbox_EN = {
-  Sandbox_VehicleRespawnManager = "Vehicle Respawn Manager",
-
-  Sandbox_VehicleRespawnManager_enableLogging = "Enable Logging",
-  Sandbox_VehicleRespawnManager_enableLogging_tooltip = "Turn <SPACE> <PUSHRGB:1,0.8,0> ON <POPRGB> <SPACE> to activate debug logging for troubleshooting. <BR> Captures spawn successes/failures, zone selections, and system operations in server logs. <BR> <ORANGE><SPACE> Recommended for diagnosing missing vehicles or spawn conflicts. <RGB:1,1,1>",
-
   Sandbox_TipsPopup = "Server Tips & Alerts",
 
   Sandbox_TipsPopup_Enabled = "Enable Tips Popup",
-  Sandbox_TipsPopup_Enabled_tooltip = "Turn on/off the tips popup system",
+  Sandbox_TipsPopup_Enabled_tooltip = "Turn on/off the tips popup system. <BR> Completely disables popups for all players.",
+
+  Sandbox_TipsPopup_PlayerCanToggle = "Players can toggle popups",
+  Sandbox_TipsPopup_PlayerCanToggle_tooltip = "Allows players to manage popups individually. <BR> Only when the popup system is enabled.",
 
   Sandbox_TipsPopup_DisplayTime = "Display Duration",
   Sandbox_TipsPopup_DisplayTime_tooltip = "How long each popup stays visible in <ORANGE><SPACE> seconds <RGB:1,1,1>",

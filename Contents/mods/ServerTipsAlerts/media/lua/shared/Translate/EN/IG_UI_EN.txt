@@ -1,0 +1,6 @@
+IGUI_EN = {
+
+    IGUI_TipsPopup_ClientToggle = "Enable Tips Popups",
+    IGUI_TipsPopup_ClientToggle_ToolTip = "Turn the Server Tips & Alerts popups on or off for your game only. <BR> This setting affects only your client and does not change the server rules. <BR> Note: The server admins must allow client-side toggling for this option to work.",
+
+}
